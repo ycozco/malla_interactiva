@@ -145,6 +145,22 @@ class CurriculumApp {
                 this.selectedCourses.delete(depId);
             });
         } else {
+            // Verificar si el curso está bloqueado
+            if (this.isLocked(courseId)) {
+                const element = this.courseElements.get(courseId);
+                if (element) {
+                    // Reiniciar animación si ya estaba activa
+                    element.classList.remove('shake');
+                    void element.offsetWidth; // Trigger reflow
+                    element.classList.add('shake');
+
+                    // Remover clase después de la animación
+                    setTimeout(() => element.classList.remove('shake'), 500);
+                }
+                console.log(`Curso ${courseId} bloqueado por prerequisitos`);
+                return;
+            }
+
             this.completedCourses.add(courseId);
             this.selectedCourses.delete(courseId);
         }
