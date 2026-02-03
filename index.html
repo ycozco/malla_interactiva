@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malla Curricular Interactiva</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Malla Curricular Interactiva</h1>
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <span class="stat-label">Créditos Completados:</span>
+                    <span class="stat-value" id="completedCredits">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Créditos Seleccionados:</span>
+                    <span class="stat-value" id="selectedCredits">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total de Créditos:</span>
+                    <span class="stat-value" id="totalCredits">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Progreso:</span>
+                    <span class="stat-value" id="progress">0%</span>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="app.clearSelection()">Limpiar Selección</button>
+                <button class="btn btn-secondary" onclick="app.clearCompleted()">Limpiar Completados</button>
+                <button class="btn btn-success" onclick="app.saveProgress()">Guardar Progreso</button>
+                <button class="btn btn-info" onclick="app.loadProgress()">Cargar Progreso</button>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box completed"></div>
+                    <span>Completado</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box selected"></div>
+                    <span>Seleccionado</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box available"></div>
+                    <span>Disponible</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box locked"></div>
+                    <span>Bloqueado</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="curriculum-grid" id="curriculumGrid">
+            <!-- Los semestres se generarán dinámicamente -->
+        </div>
+
+        <canvas id="connectionsCanvas"></canvas>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
