@@ -121,6 +121,18 @@ class CurriculumApp {
             return; // No se puede seleccionar un curso completado
         }
 
+        // Verificar si el curso está bloqueado (Strict Strict)
+        if (this.isLocked(courseId)) {
+            const element = this.courseElements.get(courseId);
+            if (element) {
+                element.classList.remove('shake');
+                void element.offsetWidth;
+                element.classList.add('shake');
+                setTimeout(() => element.classList.remove('shake'), 500);
+            }
+            return;
+        }
+
         if (this.selectedCourses.has(courseId)) {
             this.selectedCourses.delete(courseId);
         } else {
@@ -276,8 +288,11 @@ class CurriculumApp {
             // Marcar todos los semestres desde el primero hasta el actual (inclusive)
             for (let i = 0; i <= currentSemesterIndex; i++) {
                 curriculumData.semesters[i].courses.forEach(course => {
-                    this.completedCourses.add(course.id);
-                    this.selectedCourses.delete(course.id);
+                    // Solo marcar si NO está bloqueado
+                    if (!this.isLocked(course.id)) {
+                        this.completedCourses.add(course.id);
+                        this.selectedCourses.delete(course.id);
+                    }
                 });
             }
         }
@@ -341,10 +356,11 @@ class CurriculumApp {
 
         // Estilos de conexión
         const styles = {
-            default: { color: 'rgba(120, 144, 156, 0.3)', width: 1.5 },
-            active: { color: 'rgba(33, 150, 243, 0.6)', width: 2.5 },
-            completed: { color: 'rgba(76, 175, 80, 0.8)', width: 2.5 },
-            locked: { color: 'rgba(244, 67, 54, 0.5)', width: 2 }
+            default: { color: 'rgba(120, 144, 156, 0.3)', width: 1.5, dash: [] },
+            active: { color: 'rgba(33, 150, 243, 0.6)', width: 2.5, dash: [] },
+            completed: { color: 'rgba(76, 175, 80, 0.8)', width: 2.5, dash: [] },
+            locked: { color: 'rgba(244, 67, 54, 0.5)', width: 2, dash: [] },
+            planning: { color: 'rgba(33, 150, 243, 1)', width: 2.5, dash: [6, 4] } // Estilo para programados
         };
 
         Object.entries(curriculumData.prerequisites).forEach(([courseId, prerequisites]) => {
@@ -360,9 +376,9 @@ class CurriculumApp {
                 const containerRect = container.getBoundingClientRect();
 
                 const fromX = fromRect.right - containerRect.left;
-                const fromY = fromRect.top + fromRect.height / 2 - containerRect.top + window.scrollY;
+                const fromY = fromRect.top + fromRect.height / 2 - containerRect.top;
                 const toX = toRect.left - containerRect.left;
-                const toY = toRect.top + toRect.height / 2 - containerRect.top + window.scrollY;
+                const toY = toRect.top + toRect.height / 2 - containerRect.top;
 
                 // Determinar estilo
                 let style = styles.default;
@@ -370,7 +386,11 @@ class CurriculumApp {
                 if (this.completedCourses.has(prereqId) && this.completedCourses.has(courseId)) {
                     style = styles.completed;
                 } else if (this.completedCourses.has(prereqId)) {
+                    // Si el prerequisito está listo, la línea hacia el siguiente es 'activa'
                     style = styles.active;
+                } else if (this.selectedCourses.has(prereqId)) {
+                    // Si el prerequisito está PLANEADO/SELECCIONADO, resaltar el camino futuro
+                    style = styles.planning;
                 } else if (this.isLocked(courseId)) {
                     style = styles.locked;
                 }
@@ -379,6 +399,7 @@ class CurriculumApp {
                 ctx.beginPath();
                 ctx.strokeStyle = style.color;
                 ctx.lineWidth = style.width;
+                ctx.setLineDash(style.dash || []); // Aplicar linea punteada si corresponde
 
                 const controlPointX = fromX + (toX - fromX) * 0.5;
 
@@ -391,6 +412,7 @@ class CurriculumApp {
                 ctx.stroke();
 
                 // Dibujar flecha (apuntando al curso destino)
+                ctx.setLineDash([]); // Flecha sólida
                 const arrowSize = 8;
 
                 ctx.beginPath();
