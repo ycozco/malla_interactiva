@@ -33,9 +33,9 @@ Simplemente abre el archivo `index.html` en tu navegador web favorito.
 
 3. **Marcar/desmarcar un semestre completo**
    - **Click en el header del semestre** (título del semestre)
-   - Si todos los cursos están completados, se desmarcarán todos (incluyendo dependientes)
-   - Si hay cursos sin completar, se marcarán todos los que tengan sus prerequisitos cumplidos
-   - Útil para marcar semestres completos de una vez
+   - **Al marcar**: Se completan todos los cursos de ese semestre Y todos los semestres anteriores
+   - **Al desmarcar**: Se limpia solo ese semestre (y sus dependientes en cascada)
+   - Útil para marcar rápidamente tu avance hasta el semestre actual
 
 4. **Ver prerequisitos**
    - **Pasa el mouse** sobre un curso

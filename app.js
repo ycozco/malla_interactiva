@@ -32,7 +32,7 @@ class CurriculumApp {
                 this.toggleSemesterCompletion(semester);
             });
             header.style.cursor = 'pointer';
-            header.title = 'Click para marcar/desmarcar todos los cursos del semestre como completados';
+            header.title = 'Click para marcar este semestre y todos los anteriores como completados. Click nuevamente para desmarcar solo este semestre.';
 
             semesterDiv.appendChild(header);
 
@@ -212,27 +212,31 @@ class CurriculumApp {
         const allCompleted = semesterCourseIds.every(id => this.completedCourses.has(id));
 
         if (allCompleted) {
-            // Desmarcar todos los cursos del semestre y sus dependientes
+            // DESMARCAR: Solo desmarcar este semestre específico
             semesterCourseIds.forEach(courseId => {
                 this.completedCourses.delete(courseId);
                 this.selectedCourses.delete(courseId);
+            });
 
-                // Bloqueo en cascada
-                const dependents = this.getDependentCourses(courseId);
-                dependents.forEach(depId => {
-                    this.completedCourses.delete(depId);
-                    this.selectedCourses.delete(depId);
+            // Desmarcar todos los semestres POSTERIORES (que dependen de este)
+            const currentSemesterIndex = curriculumData.semesters.findIndex(s => s.id === semester.id);
+            for (let i = currentSemesterIndex + 1; i < curriculumData.semesters.length; i++) {
+                curriculumData.semesters[i].courses.forEach(course => {
+                    this.completedCourses.delete(course.id);
+                    this.selectedCourses.delete(course.id);
                 });
-            });
+            }
         } else {
-            // Marcar todos los cursos del semestre como completados
-            // Solo si sus prerequisitos están completados
-            semesterCourseIds.forEach(courseId => {
-                if (!this.isLocked(courseId)) {
-                    this.completedCourses.add(courseId);
-                    this.selectedCourses.delete(courseId);
-                }
-            });
+            // MARCAR: Marcar este semestre Y todos los anteriores
+            const currentSemesterIndex = curriculumData.semesters.findIndex(s => s.id === semester.id);
+
+            // Marcar todos los semestres desde el primero hasta el actual (inclusive)
+            for (let i = 0; i <= currentSemesterIndex; i++) {
+                curriculumData.semesters[i].courses.forEach(course => {
+                    this.completedCourses.add(course.id);
+                    this.selectedCourses.delete(course.id);
+                });
+            }
         }
 
         this.updateCourseStates();
@@ -277,13 +281,21 @@ class CurriculumApp {
     drawConnections() {
         const canvas = document.getElementById('connectionsCanvas');
         const ctx = canvas.getContext('2d');
+        const container = document.querySelector('.container');
 
         // Ajustar tamaño del canvas
-        const container = document.querySelector('.container');
         canvas.width = container.scrollWidth;
         canvas.height = container.scrollHeight;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Estilos de conexión
+        const styles = {
+            default: { color: 'rgba(120, 144, 156, 0.3)', width: 1.5 },
+            active: { color: 'rgba(33, 150, 243, 0.6)', width: 2.5 },
+            completed: { color: 'rgba(76, 175, 80, 0.8)', width: 2.5 },
+            locked: { color: 'rgba(244, 67, 54, 0.5)', width: 2 }
+        };
 
         Object.entries(curriculumData.prerequisites).forEach(([courseId, prerequisites]) => {
             const courseElement = this.courseElements.get(courseId);
@@ -302,20 +314,24 @@ class CurriculumApp {
                 const toX = toRect.left - containerRect.left;
                 const toY = toRect.top + toRect.height / 2 - containerRect.top + window.scrollY;
 
-                // Determinar color de la línea
-                let color = 'rgba(100, 100, 100, 0.3)';
+                // Determinar estilo
+                let style = styles.default;
+
                 if (this.completedCourses.has(prereqId) && this.completedCourses.has(courseId)) {
-                    color = 'rgba(76, 175, 80, 0.6)';
+                    style = styles.completed;
                 } else if (this.completedCourses.has(prereqId)) {
-                    color = 'rgba(33, 150, 243, 0.5)';
+                    style = styles.active;
+                } else if (this.isLocked(courseId)) {
+                    style = styles.locked;
                 }
 
                 // Dibujar línea curva
                 ctx.beginPath();
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = style.color;
+                ctx.lineWidth = style.width;
 
-                const controlPointX = (fromX + toX) / 2;
+                const controlPointX = fromX + (toX - fromX) * 0.5;
+
                 ctx.moveTo(fromX, fromY);
                 ctx.bezierCurveTo(
                     controlPointX, fromY,
@@ -324,19 +340,20 @@ class CurriculumApp {
                 );
                 ctx.stroke();
 
-                // Dibujar flecha
+                // Dibujar flecha (apuntando al curso destino)
                 const arrowSize = 8;
-                const angle = Math.atan2(toY - fromY, toX - fromX);
+
                 ctx.beginPath();
-                ctx.fillStyle = color;
+                ctx.fillStyle = style.color;
+
                 ctx.moveTo(toX, toY);
                 ctx.lineTo(
-                    toX - arrowSize * Math.cos(angle - Math.PI / 6),
-                    toY - arrowSize * Math.sin(angle - Math.PI / 6)
+                    toX - arrowSize,
+                    toY - arrowSize / 2
                 );
                 ctx.lineTo(
-                    toX - arrowSize * Math.cos(angle + Math.PI / 6),
-                    toY - arrowSize * Math.sin(angle + Math.PI / 6)
+                    toX - arrowSize,
+                    toY + arrowSize / 2
                 );
                 ctx.closePath();
                 ctx.fill();
