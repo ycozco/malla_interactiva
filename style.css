@@ -217,6 +217,14 @@ h1 {
     border-radius: 8px;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.semester-header:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #1976D2, #388E3C);
 }
 
 .courses-container {
@@ -280,8 +288,14 @@ h1 {
 
 .course.locked {
     background: var(--course-locked);
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
+    border: 3px solid var(--danger-color);
+    box-shadow: 0 0 15px rgba(244, 67, 54, 0.4);
+}
+
+.course.locked:hover {
+    transform: none;
 }
 
 .course.locked::after {
@@ -305,9 +319,12 @@ h1 {
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.05);
     }

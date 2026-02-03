@@ -29,8 +29,15 @@ Simplemente abre el archivo `index.html` en tu navegador web favorito.
    - **O Click derecho** en el curso
    - El curso se marcará en verde con un ✓
    - Los créditos se sumarán a "Créditos Completados"
+   - ⚠️ **Bloqueo en cascada**: Al desmarcar un curso, todos los cursos que dependen de él se desmarcarán automáticamente
 
-3. **Ver prerequisitos**
+3. **Marcar/desmarcar un semestre completo**
+   - **Click en el header del semestre** (título del semestre)
+   - Si todos los cursos están completados, se desmarcarán todos (incluyendo dependientes)
+   - Si hay cursos sin completar, se marcarán todos los que tengan sus prerequisitos cumplidos
+   - Útil para marcar semestres completos de una vez
+
+4. **Ver prerequisitos**
    - **Pasa el mouse** sobre un curso
    - Los prerequisitos se resaltarán en naranja
    - Los cursos que dependen de este se resaltarán en morado
@@ -55,7 +62,7 @@ En la parte superior verás:
 - 🟦 **Azul (Seleccionado)**: Curso que planeas tomar
 - 🟩 **Verde (Completado)**: Curso que ya terminaste
 - ⬛ **Gris oscuro (Disponible)**: Curso que puedes tomar
-- 🔒 **Gris claro (Bloqueado)**: Curso que requiere completar prerequisitos primero
+- 🔴 **Borde rojo + 🔒 (Bloqueado)**: Curso que requiere completar prerequisitos primero
 
 ### Líneas de conexión
 

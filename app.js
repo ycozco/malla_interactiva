@@ -26,6 +26,14 @@ class CurriculumApp {
             const header = document.createElement('div');
             header.className = 'semester-header';
             header.textContent = semester.name;
+
+            // Agregar evento click al header para marcar/desmarcar todo el semestre
+            header.addEventListener('click', () => {
+                this.toggleSemesterCompletion(semester);
+            });
+            header.style.cursor = 'pointer';
+            header.title = 'Click para marcar/desmarcar todos los cursos del semestre como completados';
+
             semesterDiv.appendChild(header);
 
             const coursesContainer = document.createElement('div');
@@ -99,8 +107,16 @@ class CurriculumApp {
 
     toggleCompleted(courseId) {
         if (this.completedCourses.has(courseId)) {
+            // Al desmarcar, también desmarcar todos los cursos que dependen de este
             this.completedCourses.delete(courseId);
             this.selectedCourses.delete(courseId);
+
+            // Bloqueo en cascada: desmarcar cursos dependientes
+            const dependents = this.getDependentCourses(courseId);
+            dependents.forEach(depId => {
+                this.completedCourses.delete(depId);
+                this.selectedCourses.delete(depId);
+            });
         } else {
             this.completedCourses.add(courseId);
             this.selectedCourses.delete(courseId);
@@ -168,6 +184,60 @@ class CurriculumApp {
             if (course) return course;
         }
         return null;
+    }
+
+    // Obtener todos los cursos que dependen de un curso dado (recursivamente)
+    getDependentCourses(courseId) {
+        const dependents = new Set();
+
+        const findDependents = (id) => {
+            Object.entries(curriculumData.prerequisites).forEach(([depId, prereqs]) => {
+                if (prereqs.includes(id) && !dependents.has(depId)) {
+                    dependents.add(depId);
+                    // Recursivamente encontrar dependientes de este curso
+                    findDependents(depId);
+                }
+            });
+        };
+
+        findDependents(courseId);
+        return Array.from(dependents);
+    }
+
+    // Marcar/desmarcar todos los cursos de un semestre como completados
+    toggleSemesterCompletion(semester) {
+        const semesterCourseIds = semester.courses.map(c => c.id);
+
+        // Verificar si todos los cursos del semestre están completados
+        const allCompleted = semesterCourseIds.every(id => this.completedCourses.has(id));
+
+        if (allCompleted) {
+            // Desmarcar todos los cursos del semestre y sus dependientes
+            semesterCourseIds.forEach(courseId => {
+                this.completedCourses.delete(courseId);
+                this.selectedCourses.delete(courseId);
+
+                // Bloqueo en cascada
+                const dependents = this.getDependentCourses(courseId);
+                dependents.forEach(depId => {
+                    this.completedCourses.delete(depId);
+                    this.selectedCourses.delete(depId);
+                });
+            });
+        } else {
+            // Marcar todos los cursos del semestre como completados
+            // Solo si sus prerequisitos están completados
+            semesterCourseIds.forEach(courseId => {
+                if (!this.isLocked(courseId)) {
+                    this.completedCourses.add(courseId);
+                    this.selectedCourses.delete(courseId);
+                }
+            });
+        }
+
+        this.updateCourseStates();
+        this.updateStats();
+        this.drawConnections();
     }
 
     updateStats() {
