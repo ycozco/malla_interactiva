@@ -19,16 +19,14 @@ Simplemente abre el archivo `index.html` en tu navegador web favorito.
 
 ### Interacciones con los cursos
 
-1. **Seleccionar un curso (planificación)**
-   - **Click izquierdo** en el curso
-   - El curso se marcará en azul
-   - Los créditos se sumarán a "Créditos Seleccionados"
+1. **Botones de acción rápida (NUEVO)**
+   - Cada tarjeta tiene botones que aparecen al pasar el mouse (o siempre visibles en móvil):
+   - **[📅] Planificar**: Marca el curso en azul (seleccionado)
+   - **[✓] Completar**: Marca el curso como aprobado (verde) y habilita desbloqueos
 
-2. **Marcar un curso como completado**
-   - **Shift + Click izquierdo** en el curso
-   - **O Click derecho** en el curso
-   - El curso se marcará en verde con un ✓
-   - Los créditos se sumarán a "Créditos Completados"
+2. **Interacciones con click (Alternativa)**
+   - **Click izquierdo** en el cuerpo: Selecciona/Planifica
+   - **Shift + Click** o **Click derecho**: Marca como completado
    - ⚠️ **Bloqueo en cascada**: Al desmarcar un curso, todos los cursos que dependen de él se desmarcarán automáticamente
 
 3. **Marcar/desmarcar un semestre completo**

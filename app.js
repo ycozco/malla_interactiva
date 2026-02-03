@@ -12,7 +12,8 @@ class CurriculumApp {
         this.loadProgress();
         this.updateStats();
         this.setupCanvas();
-        window.addEventListener('resize', () => this.drawConnections());
+        this.setupCanvas();
+        // ResizeObserver ya se configura en setupCanvas
     }
 
     renderCurriculum() {
@@ -55,6 +56,32 @@ class CurriculumApp {
 
                 courseDiv.appendChild(courseName);
                 courseDiv.appendChild(courseCredits);
+
+                // Botones de acción (visibles en hover o siempre en móvil)
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'course-actions';
+
+                const btnSelect = document.createElement('button');
+                btnSelect.className = 'action-btn btn-select';
+                btnSelect.innerHTML = '📅'; // Icono de calendario/plan
+                btnSelect.title = 'Planificar (Seleccionar)';
+                btnSelect.onclick = (e) => {
+                    e.stopPropagation();
+                    this.toggleSelection(course.id);
+                };
+
+                const btnComplete = document.createElement('button');
+                btnComplete.className = 'action-btn btn-complete';
+                btnComplete.innerHTML = '✓';
+                btnComplete.title = 'Marcar como Completado';
+                btnComplete.onclick = (e) => {
+                    e.stopPropagation();
+                    this.toggleCompleted(course.id);
+                };
+
+                actionsDiv.appendChild(btnSelect);
+                actionsDiv.appendChild(btnComplete);
+                courseDiv.appendChild(actionsDiv);
 
                 // Event listeners
                 courseDiv.addEventListener('click', (e) => {
@@ -272,10 +299,17 @@ class CurriculumApp {
     setupCanvas() {
         const canvas = document.getElementById('connectionsCanvas');
         const container = document.querySelector('.container');
-        canvas.width = container.scrollWidth;
-        canvas.height = container.scrollHeight;
 
-        this.drawConnections();
+        const resizeCanvas = () => {
+            canvas.width = container.scrollWidth;
+            canvas.height = container.scrollHeight;
+            this.drawConnections();
+        };
+
+        const observer = new ResizeObserver(resizeCanvas);
+        observer.observe(container);
+
+        resizeCanvas();
     }
 
     drawConnections() {

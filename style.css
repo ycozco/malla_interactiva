@@ -298,6 +298,64 @@ h1 {
     transform: none;
 }
 
+/* Botones de acción en tarjetas */
+.course-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    position: relative;
+    z-index: 2;
+    /* Asegurar que estén sobre el background */
+}
+
+.course:hover .course-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    color: white;
+}
+
+.action-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.btn-select {
+    background: var(--primary-color);
+}
+
+.btn-select:hover {
+    background: #1976D2;
+}
+
+.btn-complete {
+    background: var(--secondary-color);
+}
+
+.btn-complete:hover {
+    background: #388E3C;
+}
+
+/* Ajuste para que el texto no se monte sobre los botones si el nombre es largo */
+.course-name {
+    padding-right: 5px;
+}
+
 .course.locked::after {
     content: '🔒';
     position: absolute;
@@ -371,6 +429,11 @@ h1 {
 
     .btn {
         width: 100%;
+    }
+
+    .course-actions {
+        opacity: 1;
+        margin-top: 12px;
     }
 }
 
