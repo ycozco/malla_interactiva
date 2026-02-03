@@ -132,24 +132,83 @@ const curriculumData = {
             ]
         }
     ],
-    // Relaciones de prerequisitos (ejemplos basados en la lógica típica)
+    // Relaciones de prerequisitos basadas en el plan de estudios oficial 2013
+    // Mapeo: c1=1301101, c2=1301102, c3=1301103, c4=1301104, c5=1301105, c6=1301106, c7=1301107
+    // c8=1301201, c9=1301202, c10=1301203, c11=1301204, c12=1301205, c13=1301206
+    // c14=1301207, c15=1301208, c16=1301209, c17=1301210, c18=1301211, c19=1301212, c20=1301213, c21=1301214
+    // c22=1302215, c23=1302216, c24=1302217, c25=1302218, c26=1302219, c27=1302220, c28=1302221
+    // c29=1303125, c30=1303126, c31=1303127, c32=1303128, c33=1303129, c34=1303130
+    // c35=1303232, c36=1303233, c37=1303234, c38=1303235, c39=1303236, c40=1303237
+    // c41=1304138, c42=1304239, c43=1304240, c44=1304241, c45=1304242, c46=1304243
+    // c47=1304244, c48=1304245, c49=1304246, c50=1304247, c51=1304248, c52=1304249, c53=1304250, c54=1304251
+    // c55=1305156, c56=1305257, c57=1305258, c58=1305259, c59=1305260, c60=1305261, c61=1305262, c62=1305263, c63=1305264
+    // c64=1305160, c65=1305265, c66=1305266, c67=1305267, c68=1305268, c69=1305269, c70=1305159
+
     prerequisites: {
-        "c8": ["c2"],   // Cálculo en una variable requiere Matemática Básica
-        "c9": ["c4"],   // Estructuras Discretas 2 requiere Estructuras Discretas
-        "c10": ["c5"],  // Fundamentos Prog 2 requiere Fundamentos Prog 1
-        "c11": ["c5"],  // Programación Web I requiere Fundamentos Prog 1
-        "c14": ["c8"],  // Cálculo varias variables requiere Cálculo una variable
-        "c16": ["c9"],  // Estructura de Datos requiere Estructuras Discretas 2
-        "c17": ["c11"], // Programación Web 2 requiere Programación Web 1
-        "c24": ["c16"], // Análisis y Diseño de Algoritmos requiere Estructura de Datos
-        "c30": ["c16"], // Programación de Sistemas requiere Estructura de Datos
-        "c33": ["c16"], // Base de Datos requiere Estructura de Datos
-        "c36": ["c23"], // Sistemas Operativos requiere Arquitectura de Computadoras
-        "c38": ["c32"], // Construcción de Software requiere Ingeniería de Software
-        "c39": ["c33"], // Tecnología de BD requiere Base de Datos
-        "c43": ["c36"], // Sistemas Distribuidos requiere Sistemas Operativos
-        "c44": ["c38"], // Pruebas de Software requiere Construcción de Software
-        "c50": ["c44"], // Calidad de Software requiere Pruebas de Software
-        "c51": ["c38"], // Arquitectura de Software requiere Construcción de Software
+        // SEGUNDO SEMESTRE
+        "c8": ["c2"],        // 1301201: Cálculo en una Variable → 1301102
+        "c9": ["c4"],        // 1301202: Estructuras Discretas 2 → 1301104
+        "c10": ["c5"],       // 1301203: Fundamentos de Programación 2 → 1301105
+        "c11": ["c5"],       // 1301204: Programación Web 1 → 1301105
+
+        // TERCER SEMESTRE
+        "c14": ["c8"],       // 1301207: Cálculo en Varias Variables → 1301201
+        "c16": ["c9", "c10"], // 1301209: Estructura de Datos y Algoritmos → 1301202, 1301203
+        "c17": ["c11"],      // 1301210: Programación Web 2 → 1301204
+        "c18": ["c12"],      // 1301211: Talleres de Psicología → 1301205
+        "c20": ["c13"],      // 1301213: Ciudadanía e Interculturalidad → 1301206
+        "c21": ["c13"],      // 1301214: Redacción de Artículos → 1301206
+
+        // CUARTO SEMESTRE
+        "c23": ["c16"],      // 1302216: Arquitectura de Computadoras → 1301209
+        "c24": ["c16"],      // 1302217: Análisis y Diseño de Algoritmos → 1301209
+        "c25": ["c17"],      // 1302218: Interacción Humano Computador → 1301210
+        "c28": ["c21"],      // 1302221: Métodos de Investigación → 1301214
+
+        // QUINTO SEMESTRE
+        "c29": ["c22"],      // 1303125: Investigación de Operaciones → 1302215
+        "c30": ["c23"],      // 1303126: Programación de Sistemas → 1302216
+        "c31": ["c23"],      // 1303127: Teoría de la Computación → 1302216
+        "c32": ["c23"],      // 1303128: Ingeniería y Procesos de Software → 1302216
+        "c33": ["c24"],      // 1303129: Base de Datos → 1302217
+
+        // SEXTO SEMESTRE
+        "c36": ["c30"],      // 1303233: Sistemas Operativos → 1303126
+        "c37": ["c30"],      // 1303234: Redes y Comunicación de Datos → 1303126
+        "c38": ["c32"],      // 1303235: Construcción de Software → 1303128
+        "c39": ["c33"],      // 1303236: Tecnología de Base de Datos → 1303129
+        "c40": ["c33"],      // 1303237: Fundamentos de Sistemas de Información → 1303129
+
+        // SÉPTIMO SEMESTRE
+        "c41": ["c22"],      // 1304138: Inteligencia Artificial → 1302215
+        "c43": ["c38"],      // 1304240: Sistemas Distribuidos → 1303235
+        "c44": ["c38"],      // 1304241: Pruebas de Software → 1303235
+        "c45": ["c38"],      // 1304242: Ingeniería de Requisitos → 1303235
+        "c46": ["c40"],      // 1304243: Tecnología de Información → 1303237
+
+        // OCTAVO SEMESTRE
+        "c47": ["c26"],      // 1304244: Introducción al Desarrollo de Emprendimiento → 1302219
+        "c48": ["c43"],      // 1304245: Introducción al Desarrollo de Plataformas → 1304240
+        "c50": ["c44"],      // 1304247: Calidad de Software → 1304241
+        "c51": ["c44"],      // 1304248: Arquitectura de Software → 1304241
+        "c52": ["c44"],      // 1304249: Gestión de Proyectos de Software → 1304241
+        "c53": ["c46"],      // 1304250: Auditoría de Sistemas y Negocios Electrónicos → 1304243
+        "c54": ["c46"],      // 1304251: Auditoría de Sistemas → 1304243
+
+        // NOVENO SEMESTRE
+        "c55": ["c48"],      // 1305156: Computación Gráfica / Desarrollo de Multimedia → 1304245
+        "c56": ["c48"],      // 1305257: Desarrollo Avanzado de Plataformas → 1304245
+        "c59": ["c52"],      // 1305260: Proyecto de Ingeniería de Software → 1304249
+        "c60": ["c47"],      // 1305261: Gestión de Emprendimiento de Software → 1304244
+        "c61": ["c50"],      // 1305262: Ingeniería de Test → 1304247
+
+        // DÉCIMO SEMESTRE
+        "c64": ["c59"],      // 1305160: Desarrollo de Software Para Negocios → 1305260
+        "c65": ["c56"],      // 1305265: Plataformas Emergentes → 1305257
+        "c66": ["c59"],      // 1305266: Tópicos Avanzados en Ingeniería de Software → 1305260
+        "c67": ["c59"],      // 1305267: Prácticas Pre Profesionales → 1305260
+        "c68": ["c59"],      // 1305268: Seminario de Ingeniería de Software → 1305260
+        "c69": ["c59"],      // 1305269: Seminario de Tesis I → 1305260
+        "c70": ["c59"]       // 1305159: Gestión de Sistemas de Información → 1305260
     }
 };
