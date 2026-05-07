@@ -1,9 +1,9 @@
-// Aplicación principal
 class CurriculumApp {
     constructor() {
         this.selectedCourses = new Set();
         this.completedCourses = new Set();
         this.courseElements = new Map();
+        this.semesterHeaders = new Map();
         this.init();
     }
 
@@ -12,8 +12,6 @@ class CurriculumApp {
         this.loadProgress();
         this.updateStats();
         this.setupCanvas();
-        this.setupCanvas();
-        // ResizeObserver ya se configura en setupCanvas
     }
 
     renderCurriculum() {
@@ -26,15 +24,24 @@ class CurriculumApp {
 
             const header = document.createElement('div');
             header.className = 'semester-header';
-            header.textContent = semester.name;
+            header.style.cursor = 'pointer';
+            header.title = 'Click para marcar este semestre y todos los anteriores como completados. Click nuevamente para desmarcar.';
 
-            // Agregar evento click al header para marcar/desmarcar todo el semestre
+            const headerTitle = document.createElement('span');
+            headerTitle.textContent = semester.name;
+
+            const badge = document.createElement('span');
+            badge.className = 'semester-badge';
+            badge.textContent = `0 / ${semester.courses.length} completados`;
+
+            header.appendChild(headerTitle);
+            header.appendChild(badge);
+
             header.addEventListener('click', () => {
                 this.toggleSemesterCompletion(semester);
             });
-            header.style.cursor = 'pointer';
-            header.title = 'Click para marcar este semestre y todos los anteriores como completados. Click nuevamente para desmarcar solo este semestre.';
 
+            this.semesterHeaders.set(semester.id, badge);
             semesterDiv.appendChild(header);
 
             const coursesContainer = document.createElement('div');
@@ -52,18 +59,17 @@ class CurriculumApp {
 
                 const courseCredits = document.createElement('div');
                 courseCredits.className = 'course-credits';
-                courseCredits.textContent = `${course.credits} créditos`;
+                courseCredits.textContent = `${course.credits} crédito${course.credits !== 1 ? 's' : ''}`;
 
                 courseDiv.appendChild(courseName);
                 courseDiv.appendChild(courseCredits);
 
-                // Botones de acción (visibles en hover o siempre en móvil)
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = 'course-actions';
 
                 const btnSelect = document.createElement('button');
                 btnSelect.className = 'action-btn btn-select';
-                btnSelect.innerHTML = '📅'; // Icono de calendario/plan
+                btnSelect.innerHTML = '📅';
                 btnSelect.title = 'Planificar (Seleccionar)';
                 btnSelect.onclick = (e) => {
                     e.stopPropagation();
@@ -83,7 +89,6 @@ class CurriculumApp {
                 actionsDiv.appendChild(btnComplete);
                 courseDiv.appendChild(actionsDiv);
 
-                // Event listeners
                 courseDiv.addEventListener('click', (e) => {
                     if (e.shiftKey) {
                         this.toggleCompleted(course.id);
@@ -117,19 +122,10 @@ class CurriculumApp {
     }
 
     toggleSelection(courseId) {
-        if (this.completedCourses.has(courseId)) {
-            return; // No se puede seleccionar un curso completado
-        }
+        if (this.completedCourses.has(courseId)) return;
 
-        // Verificar si el curso está bloqueado (Strict Strict)
         if (this.isLocked(courseId)) {
-            const element = this.courseElements.get(courseId);
-            if (element) {
-                element.classList.remove('shake');
-                void element.offsetWidth;
-                element.classList.add('shake');
-                setTimeout(() => element.classList.remove('shake'), 500);
-            }
+            this._shake(courseId);
             return;
         }
 
@@ -146,33 +142,19 @@ class CurriculumApp {
 
     toggleCompleted(courseId) {
         if (this.completedCourses.has(courseId)) {
-            // Al desmarcar, también desmarcar todos los cursos que dependen de este
             this.completedCourses.delete(courseId);
             this.selectedCourses.delete(courseId);
 
-            // Bloqueo en cascada: desmarcar cursos dependientes
             const dependents = this.getDependentCourses(courseId);
             dependents.forEach(depId => {
                 this.completedCourses.delete(depId);
                 this.selectedCourses.delete(depId);
             });
         } else {
-            // Verificar si el curso está bloqueado
             if (this.isLocked(courseId)) {
-                const element = this.courseElements.get(courseId);
-                if (element) {
-                    // Reiniciar animación si ya estaba activa
-                    element.classList.remove('shake');
-                    void element.offsetWidth; // Trigger reflow
-                    element.classList.add('shake');
-
-                    // Remover clase después de la animación
-                    setTimeout(() => element.classList.remove('shake'), 500);
-                }
-                console.log(`Curso ${courseId} bloqueado por prerequisitos`);
+                this._shake(courseId);
                 return;
             }
-
             this.completedCourses.add(courseId);
             this.selectedCourses.delete(courseId);
         }
@@ -180,6 +162,15 @@ class CurriculumApp {
         this.updateCourseStates();
         this.updateStats();
         this.drawConnections();
+    }
+
+    _shake(courseId) {
+        const element = this.courseElements.get(courseId);
+        if (!element) return;
+        element.classList.remove('shake');
+        void element.offsetWidth;
+        element.classList.add('shake');
+        setTimeout(() => element.classList.remove('shake'), 500);
     }
 
     updateCourseStates() {
@@ -196,12 +187,26 @@ class CurriculumApp {
                 element.classList.add('available');
             }
         });
+
+        this.updateSemesterBadges();
+    }
+
+    updateSemesterBadges() {
+        curriculumData.semesters.forEach(semester => {
+            const badge = this.semesterHeaders.get(semester.id);
+            if (!badge) return;
+
+            const total = semester.courses.length;
+            const done = semester.courses.filter(c => this.completedCourses.has(c.id)).length;
+
+            badge.textContent = `${done} / ${total} completado${done !== 1 ? 's' : ''}`;
+            badge.classList.toggle('all-done', done === total);
+        });
     }
 
     isLocked(courseId) {
         const prerequisites = curriculumData.prerequisites[courseId];
         if (!prerequisites) return false;
-
         return prerequisites.some(prereq => !this.completedCourses.has(prereq));
     }
 
@@ -210,19 +215,14 @@ class CurriculumApp {
         if (prerequisites) {
             prerequisites.forEach(prereqId => {
                 const element = this.courseElements.get(prereqId);
-                if (element) {
-                    element.classList.add('prerequisite-highlight');
-                }
+                if (element) element.classList.add('prerequisite-highlight');
             });
         }
 
-        // También resaltar cursos que dependen de este
         Object.entries(curriculumData.prerequisites).forEach(([id, prereqs]) => {
             if (prereqs.includes(courseId)) {
                 const element = this.courseElements.get(id);
-                if (element) {
-                    element.classList.add('dependent-highlight');
-                }
+                if (element) element.classList.add('dependent-highlight');
             }
         });
     }
@@ -241,7 +241,6 @@ class CurriculumApp {
         return null;
     }
 
-    // Obtener todos los cursos que dependen de un curso dado (recursivamente)
     getDependentCourses(courseId) {
         const dependents = new Set();
 
@@ -249,7 +248,6 @@ class CurriculumApp {
             Object.entries(curriculumData.prerequisites).forEach(([depId, prereqs]) => {
                 if (prereqs.includes(id) && !dependents.has(depId)) {
                     dependents.add(depId);
-                    // Recursivamente encontrar dependientes de este curso
                     findDependents(depId);
                 }
             });
@@ -259,36 +257,28 @@ class CurriculumApp {
         return Array.from(dependents);
     }
 
-    // Marcar/desmarcar todos los cursos de un semestre como completados
     toggleSemesterCompletion(semester) {
         const semesterCourseIds = semester.courses.map(c => c.id);
-
-        // Verificar si todos los cursos del semestre están completados
         const allCompleted = semesterCourseIds.every(id => this.completedCourses.has(id));
 
         if (allCompleted) {
-            // DESMARCAR: Solo desmarcar este semestre específico
             semesterCourseIds.forEach(courseId => {
                 this.completedCourses.delete(courseId);
                 this.selectedCourses.delete(courseId);
             });
 
-            // Desmarcar todos los semestres POSTERIORES (que dependen de este)
-            const currentSemesterIndex = curriculumData.semesters.findIndex(s => s.id === semester.id);
-            for (let i = currentSemesterIndex + 1; i < curriculumData.semesters.length; i++) {
+            const currentIndex = curriculumData.semesters.findIndex(s => s.id === semester.id);
+            for (let i = currentIndex + 1; i < curriculumData.semesters.length; i++) {
                 curriculumData.semesters[i].courses.forEach(course => {
                     this.completedCourses.delete(course.id);
                     this.selectedCourses.delete(course.id);
                 });
             }
         } else {
-            // MARCAR: Marcar este semestre Y todos los anteriores
-            const currentSemesterIndex = curriculumData.semesters.findIndex(s => s.id === semester.id);
+            const currentIndex = curriculumData.semesters.findIndex(s => s.id === semester.id);
 
-            // Marcar todos los semestres desde el primero hasta el actual (inclusive)
-            for (let i = 0; i <= currentSemesterIndex; i++) {
+            for (let i = 0; i <= currentIndex; i++) {
                 curriculumData.semesters[i].courses.forEach(course => {
-                    // Solo marcar si NO está bloqueado
                     if (!this.isLocked(course.id)) {
                         this.completedCourses.add(course.id);
                         this.selectedCourses.delete(course.id);
@@ -310,7 +300,6 @@ class CurriculumApp {
         curriculumData.semesters.forEach(semester => {
             semester.courses.forEach(course => {
                 totalCredits += course.credits;
-
                 if (this.completedCourses.has(course.id)) {
                     completedCredits += course.credits;
                 } else if (this.selectedCourses.has(course.id)) {
@@ -323,8 +312,11 @@ class CurriculumApp {
         document.getElementById('completedCredits').textContent = completedCredits;
         document.getElementById('selectedCredits').textContent = selectedCredits;
 
-        const progress = ((completedCredits / totalCredits) * 100).toFixed(1);
-        document.getElementById('progress').textContent = `${progress}%`;
+        const pct = totalCredits > 0 ? (completedCredits / totalCredits) * 100 : 0;
+        document.getElementById('progress').textContent = `${pct.toFixed(1)}%`;
+
+        const bar = document.getElementById('progressBarFill');
+        if (bar) bar.style.width = `${pct}%`;
     }
 
     setupCanvas() {
@@ -345,23 +337,26 @@ class CurriculumApp {
 
     drawConnections() {
         const canvas = document.getElementById('connectionsCanvas');
+        if (!canvas || canvas.style.display === 'none') return;
+
         const ctx = canvas.getContext('2d');
         const container = document.querySelector('.container');
 
-        // Ajustar tamaño del canvas
         canvas.width = container.scrollWidth;
         canvas.height = container.scrollHeight;
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Estilos de conexión
         const styles = {
-            default: { color: 'rgba(120, 144, 156, 0.3)', width: 1.5, dash: [] },
-            active: { color: 'rgba(33, 150, 243, 0.6)', width: 2.5, dash: [] },
-            completed: { color: 'rgba(76, 175, 80, 0.8)', width: 2.5, dash: [] },
-            locked: { color: 'rgba(244, 67, 54, 0.5)', width: 2, dash: [] },
-            planning: { color: 'rgba(33, 150, 243, 1)', width: 2.5, dash: [6, 4] } // Estilo para programados
+            default:  { color: 'rgba(120, 144, 156, 0.3)', width: 1.5, dash: [] },
+            active:   { color: 'rgba(33, 150, 243, 0.6)',  width: 2.5, dash: [] },
+            completed:{ color: 'rgba(76, 175, 80, 0.8)',   width: 2.5, dash: [] },
+            locked:   { color: 'rgba(244, 67, 54, 0.5)',   width: 2,   dash: [] },
+            planning: { color: 'rgba(33, 150, 243, 1)',     width: 2.5, dash: [6, 4] }
         };
+
+        const containerRect = container.getBoundingClientRect();
+        const scrollX = window.scrollX;
+        const scrollY = window.scrollY;
 
         Object.entries(curriculumData.prerequisites).forEach(([courseId, prerequisites]) => {
             const courseElement = this.courseElements.get(courseId);
@@ -373,60 +368,40 @@ class CurriculumApp {
 
                 const fromRect = prereqElement.getBoundingClientRect();
                 const toRect = courseElement.getBoundingClientRect();
-                const containerRect = container.getBoundingClientRect();
 
-                const fromX = fromRect.right - containerRect.left;
-                const fromY = fromRect.top + fromRect.height / 2 - containerRect.top;
-                const toX = toRect.left - containerRect.left;
-                const toY = toRect.top + toRect.height / 2 - containerRect.top;
+                const fromX = fromRect.right  - containerRect.left + scrollX;
+                const fromY = fromRect.top + fromRect.height / 2 - containerRect.top + scrollY;
+                const toX   = toRect.left    - containerRect.left + scrollX;
+                const toY   = toRect.top   + toRect.height   / 2 - containerRect.top + scrollY;
 
-                // Determinar estilo
                 let style = styles.default;
-
                 if (this.completedCourses.has(prereqId) && this.completedCourses.has(courseId)) {
                     style = styles.completed;
                 } else if (this.completedCourses.has(prereqId)) {
-                    // Si el prerequisito está listo, la línea hacia el siguiente es 'activa'
                     style = styles.active;
                 } else if (this.selectedCourses.has(prereqId)) {
-                    // Si el prerequisito está PLANEADO/SELECCIONADO, resaltar el camino futuro
                     style = styles.planning;
                 } else if (this.isLocked(courseId)) {
                     style = styles.locked;
                 }
 
-                // Dibujar línea curva
                 ctx.beginPath();
                 ctx.strokeStyle = style.color;
                 ctx.lineWidth = style.width;
-                ctx.setLineDash(style.dash || []); // Aplicar linea punteada si corresponde
+                ctx.setLineDash(style.dash || []);
 
-                const controlPointX = fromX + (toX - fromX) * 0.5;
-
+                const cpX = fromX + (toX - fromX) * 0.5;
                 ctx.moveTo(fromX, fromY);
-                ctx.bezierCurveTo(
-                    controlPointX, fromY,
-                    controlPointX, toY,
-                    toX, toY
-                );
+                ctx.bezierCurveTo(cpX, fromY, cpX, toY, toX, toY);
                 ctx.stroke();
 
-                // Dibujar flecha (apuntando al curso destino)
-                ctx.setLineDash([]); // Flecha sólida
+                ctx.setLineDash([]);
                 const arrowSize = 8;
-
                 ctx.beginPath();
                 ctx.fillStyle = style.color;
-
                 ctx.moveTo(toX, toY);
-                ctx.lineTo(
-                    toX - arrowSize,
-                    toY - arrowSize / 2
-                );
-                ctx.lineTo(
-                    toX - arrowSize,
-                    toY + arrowSize / 2
-                );
+                ctx.lineTo(toX - arrowSize, toY - arrowSize / 2);
+                ctx.lineTo(toX - arrowSize, toY + arrowSize / 2);
                 ctx.closePath();
                 ctx.fill();
             });
@@ -438,14 +413,20 @@ class CurriculumApp {
         this.updateCourseStates();
         this.updateStats();
         this.drawConnections();
+        this.showToast('Selección limpiada', 'info');
     }
 
     clearCompleted() {
+        if (this.completedCourses.size === 0) {
+            this.showToast('No hay cursos completados para limpiar', 'warning');
+            return;
+        }
         if (confirm('¿Estás seguro de que quieres limpiar todos los cursos completados?')) {
             this.completedCourses.clear();
             this.updateCourseStates();
             this.updateStats();
             this.drawConnections();
+            this.showToast('Cursos completados limpiados', 'info');
         }
     }
 
@@ -458,7 +439,6 @@ class CurriculumApp {
 
         localStorage.setItem('curriculumProgress', JSON.stringify(data));
 
-        // También guardar como archivo descargable
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -467,7 +447,7 @@ class CurriculumApp {
         a.click();
         URL.revokeObjectURL(url);
 
-        alert('Progreso guardado exitosamente');
+        this.showToast('Progreso guardado exitosamente', 'success');
     }
 
     loadProgress() {
@@ -476,7 +456,7 @@ class CurriculumApp {
             try {
                 const data = JSON.parse(saved);
                 this.completedCourses = new Set(data.completed || []);
-                this.selectedCourses = new Set(data.selected || []);
+                this.selectedCourses  = new Set(data.selected  || []);
                 this.updateCourseStates();
                 this.updateStats();
                 this.drawConnections();
@@ -485,9 +465,27 @@ class CurriculumApp {
             }
         }
     }
+
+    showToast(message, type = 'info', duration = 3000) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => toast.classList.add('show'));
+        });
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+        }, duration);
+    }
 }
 
-// Inicializar la aplicación
 let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new CurriculumApp();
