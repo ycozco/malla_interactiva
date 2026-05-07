@@ -23,9 +23,12 @@
                     <span class="stat-label">Total de Créditos:</span>
                     <span class="stat-value" id="totalCredits">0</span>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item stat-progress">
                     <span class="stat-label">Progreso:</span>
                     <span class="stat-value" id="progress">0%</span>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
+                    </div>
                 </div>
             </div>
             <div class="controls">
@@ -60,6 +63,8 @@
 
         <canvas id="connectionsCanvas"></canvas>
     </div>
+
+    <div class="toast-container" id="toastContainer"></div>
 
     <script src="data.js"></script>
     <script src="app.js"></script>
