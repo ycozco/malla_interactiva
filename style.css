@@ -697,6 +697,267 @@ h1 {
     }
 }
 
+/* ── Overlay Selector de Malla ────────────────────────── */
+.malla-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(7, 16, 31, 0.96);
+    backdrop-filter: saturate(160%) blur(16px);
+    -webkit-backdrop-filter: saturate(160%) blur(16px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.malla-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.malla-selector-box {
+    max-width: 780px;
+    width: 100%;
+}
+
+.malla-selector-header {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.malla-selector-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, #74B3FA 0%, #38DEA0 60%, #9F7AEA 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+}
+
+.malla-selector-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+/* Grid de cards de malla */
+.malla-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.malla-card {
+    background: var(--bg-layer2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 28px 24px 22px;
+    cursor: pointer;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Línea de acento superior por malla */
+.malla-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent, var(--primary));
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.malla-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.malla-card:hover::before {
+    opacity: 1;
+}
+
+.malla-card.active {
+    border-color: var(--card-accent, var(--primary));
+    box-shadow: 0 0 0 2px var(--card-accent, var(--primary)), var(--shadow-lg);
+}
+
+.malla-card.active::before {
+    opacity: 1;
+}
+
+.malla-card-icon {
+    font-size: 2.4rem;
+    display: block;
+    margin-bottom: 14px;
+    line-height: 1;
+}
+
+.malla-card-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+}
+
+.malla-card-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.malla-card-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+}
+
+.malla-meta-chip {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    background: var(--bg-layer1);
+    border: 1px solid var(--border-subtle);
+    padding: 3px 10px;
+    border-radius: 99px;
+}
+
+/* Progreso guardado en la card */
+.malla-card-progress {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.malla-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.malla-progress-track {
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    height: 5px;
+    overflow: hidden;
+}
+
+.malla-progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Barra de malla activa (en el header) ──────────────── */
+.current-malla-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 8px 16px;
+    background: var(--bg-layer1);
+    border: 1px solid var(--border-subtle);
+    border-radius: 99px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    transition: border-color 0.3s ease;
+}
+
+.current-malla-bar:hover {
+    border-color: var(--border-accent);
+}
+
+.current-malla-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.current-malla-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.01em;
+}
+
+.btn-switch-malla {
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--primary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.btn-switch-malla:hover {
+    color: var(--primary-dark);
+}
+
+/* ── Animaciones de entrada de cursos ─────────────────── */
+@keyframes courseEntrance {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.course {
+    animation: courseEntrance 0.35s ease both;
+}
+
+/* ── Print ────────────────────────────────────────────── */
+@media print {
+    .malla-overlay,
+    .controls,
+    .current-malla-bar,
+    .course-actions,
+    .toast-container,
+    #connectionsCanvas { display: none !important; }
+
+    body { background: white; color: black; padding: 0; }
+
+    header {
+        background: white;
+        border: 1px solid #ccc;
+        color: black;
+        border-radius: 0;
+        margin-bottom: 16px;
+    }
+
+    h1 { -webkit-text-fill-color: black; color: black; }
+
+    .stat-value { color: #1a1a1a; }
+
+    .curriculum-grid {
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    .semester { break-inside: avoid; border: 1px solid #ddd; background: #f9f9f9; }
+    .course   { break-inside: avoid; background: white; border: 1px solid #eee; }
+}
+
 /* ── Responsive: Móvil pequeño (≤ 480px) ─────────────── */
 @media (max-width: 480px) {
     h1 {

@@ -10,36 +10,62 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <!-- ── Selector de Malla (overlay inicial) ────────────────────────── -->
+    <div class="malla-overlay" id="mallaOverlay">
+        <div class="malla-selector-box">
+            <div class="malla-selector-header">
+                <h2 class="malla-selector-title">Malla Curricular Interactiva</h2>
+                <p class="malla-selector-subtitle">Selecciona la carrera que deseas gestionar</p>
+            </div>
+            <div class="malla-cards-grid" id="mallaCardsGrid">
+                <!-- Generado por app.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Aplicación principal ───────────────────────────────────────── -->
     <div class="container">
         <header>
             <h1>Malla Curricular Interactiva</h1>
+
+            <div class="current-malla-bar" id="currentMallaBar">
+                <span class="current-malla-icon" id="currentMallaIcon">💻</span>
+                <span class="current-malla-name" id="currentMallaName">Cargando…</span>
+                <button class="btn-switch-malla" onclick="app.showMallaSelector()">
+                    Cambiar malla ↗
+                </button>
+            </div>
+
             <div class="stats-panel">
                 <div class="stat-item">
-                    <span class="stat-label">Créditos Completados:</span>
+                    <span class="stat-label">Créditos Completados</span>
                     <span class="stat-value" id="completedCredits">0</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Créditos Seleccionados:</span>
+                    <span class="stat-label">Créditos Seleccionados</span>
                     <span class="stat-value" id="selectedCredits">0</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Total de Créditos:</span>
+                    <span class="stat-label">Total de Créditos</span>
                     <span class="stat-value" id="totalCredits">0</span>
                 </div>
                 <div class="stat-item stat-progress">
-                    <span class="stat-label">Progreso:</span>
+                    <span class="stat-label">Progreso</span>
                     <span class="stat-value" id="progress">0%</span>
                     <div class="progress-bar">
                         <div class="progress-bar-fill" id="progressBarFill"></div>
                     </div>
                 </div>
             </div>
+
             <div class="controls">
-                <button class="btn btn-primary" onclick="app.clearSelection()">Limpiar Selección</button>
+                <button class="btn btn-primary"   onclick="app.clearSelection()">Limpiar Selección</button>
                 <button class="btn btn-secondary" onclick="app.clearCompleted()">Limpiar Completados</button>
-                <button class="btn btn-success" onclick="app.saveProgress()">Guardar Progreso</button>
-                <button class="btn btn-info" onclick="app.loadProgress()">Cargar Progreso</button>
+                <button class="btn btn-success"   onclick="app.saveProgress()">Guardar Progreso</button>
+                <button class="btn btn-info"      onclick="app.loadFromFile()">Cargar Archivo</button>
             </div>
+
             <div class="legend">
                 <div class="legend-item">
                     <div class="legend-box completed"></div>
@@ -61,13 +87,16 @@
         </header>
 
         <div class="curriculum-grid" id="curriculumGrid">
-            <!-- Los semestres se generarán dinámicamente -->
+            <!-- Generado por app.js -->
         </div>
 
         <canvas id="connectionsCanvas"></canvas>
     </div>
 
     <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Input oculto para cargar archivo JSON -->
+    <input type="file" id="fileInput" accept=".json" style="display:none">
 
     <script src="data.js"></script>
     <script src="app.js"></script>
